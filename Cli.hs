@@ -28,7 +28,7 @@ processObject obj = Actions
 
 getYAML :: IO Actions
 getYAML = do
-  yaml <- Yaml.decodeFileEither "example.yaml"
+  yaml <- Yaml.decodeFileEither "/home/andrei/.config/amkhlv/mu.yaml"
   case yaml of
     Right value -> return $ processObject value
     Left err -> fail $ "YAML Error: " ++ Yaml.prettyPrintParseException err
