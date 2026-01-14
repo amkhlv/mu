@@ -1,1 +1,33 @@
-{ description = "A flake for building and developing the mu project on NixOS"; flake-version = "1"; inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; outputs = { self, nixpkgs }: let { pkgs } = import nixpkgs { system = "x86_64-linux"; }; in { packages.x86_64-linux = pkgs.mkShell { buildInputs = [  ]; # Add necessary packages like gcc, cmake, etc. here }; };}
+{
+  description = "mu";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        dflt = import ./default.nix { inherit pkgs; };
+      in
+      {
+        packages.default = dflt;
+        devShells = {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              haskellPackages.haskell-language-server
+              ghcid
+              cabal-install
+            ];
+            inputsFrom = map (__getAttr "env") (__attrValues self.packages.${system});
+          };
+        };
+      }
+    );
+}

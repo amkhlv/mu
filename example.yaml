@@ -1,14 +1,2 @@
-name: John Doe
-age: 30
-email: john.doe@example.com
-address:
-  street: 123 Main St
-  city: Springfield
-  state: IL
-  zip: "62701"
-hobbies:
-  - reading
-  - hiking
-  - programming
-active: true
-balance: 1234.56
+a1: echo hi
+a2: ls
