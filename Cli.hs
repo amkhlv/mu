@@ -9,12 +9,24 @@ import qualified Data.Yaml as Yaml
 import qualified Control.Monad.IO.Class as CM
 import Language.Haskell.TH
 import qualified Data.HashMap.Strict as HM
+import qualified Data.Aeson.Key as Key
+import qualified Data.Aeson.KeyMap as KM
+import qualified Data.Text as T
 
 type Actions = [(String, String)]
 
-processObject :: Aeson.Object -> [(String, String)]
-processObject obj = HM.toList obj
-
+processObject :: Aeson.Object -> Actions
+processObject obj =
+  [ (T.unpack (Key.toText key), valueToString value)
+  | (key, value) <- KM.toList obj
+  ]
+  where
+    valueToString :: Aeson.Value -> String
+    valueToString (Aeson.String s) = T.unpack s
+    valueToString (Aeson.Number n) = show n
+    valueToString (Aeson.Bool b)   = show b
+    valueToString Aeson.Null       = "null"
+    valueToString _                = "<unsupported>"
 
 getYAML :: IO Actions
 getYAML = do
