@@ -13,10 +13,6 @@ import Options.Applicative
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
-data Options = Options
-  { inputFile :: FilePath,
-    compactOutput :: Bool
-  }
 
 commandParser :: Parser MyCommand
 commandParser =
