@@ -1,0 +1,1 @@
+{ description = "A flake for building and developing the mu project on NixOS"; flake-version = "1"; inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; outputs = { self, nixpkgs }: let { pkgs } = import nixpkgs { system = "x86_64-linux"; }; in { packages.x86_64-linux = pkgs.mkShell { buildInputs = [  ]; # Add necessary packages like gcc, cmake, etc. here }; };}
