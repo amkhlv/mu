@@ -20,11 +20,7 @@ data Options = Options
 
 commandParser :: Parser MyCommand
 commandParser =
-  $( mkCommandParserExp
- --      [ ("ls", "List files in long format"),
- --        ("cert", "Certificate operations")
- --      ]
-   )
+  $(mkCommandParserExp)
 
 opts :: ParserInfo MyCommand
 opts = info (commandParser <**> helper) idm

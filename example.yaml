@@ -1,2 +1,5 @@
-a1: echo hi
-a2: ls
+com1: echo hi
+com2: ls
+mult: 
+  subcom1: ls -lh
+  subcom2: ls -a

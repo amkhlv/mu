@@ -13,20 +13,18 @@ import qualified Data.Aeson.Key as Key
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.Text as T
 
-type Actions = [(String, String)]
+data Actions = Actions [(String, Either Actions String)]
 
 processObject :: Aeson.Object -> Actions
-processObject obj =
+processObject obj = Actions
   [ (T.unpack (Key.toText key), valueToString value)
   | (key, value) <- KM.toList obj
   ]
   where
-    valueToString :: Aeson.Value -> String
-    valueToString (Aeson.String s) = T.unpack s
-    valueToString (Aeson.Number n) = show n
-    valueToString (Aeson.Bool b)   = show b
-    valueToString Aeson.Null       = "null"
-    valueToString _                = "<unsupported>"
+    valueToString :: Aeson.Value -> Either Actions String
+    valueToString (Aeson.String s) = Right $ T.unpack s
+    valueToString (Aeson.Object obj) = Left $ processObject obj
+    valueToString _                = Left (Actions [])
 
 getYAML :: IO Actions
 getYAML = do
@@ -41,17 +39,20 @@ mkCommandParserExp :: Q Exp
 mkCommandParserExp  = do
   yaml <- CM.liftIO getYAML
   commandsExp <- mkCommandsMonoid yaml
-  [|subparser $(pure commandsExp)|]
+  [|hsubparser $(pure commandsExp)|]
   where
-    mkCommandsMonoid :: [(String, String)] -> Q Exp
-    mkCommandsMonoid [] =
+    mkCommandsMonoid :: Actions -> Q Exp
+    mkCommandsMonoid (Actions []) =
       fail "mkCommandParserExp: empty command list (subparser would be useless)"
-    mkCommandsMonoid (x : xs) =
+    mkCommandsMonoid (Actions (x : xs)) =
       foldl
         (\accQ specQ -> [|$accQ <> $(mkOne specQ)|])
         (mkOne x)
         xs
 
-    mkOne :: (String, String) -> Q Exp
-    mkOne (nm, desc) =
-      [|command nm (info (pure $ MyCommand nm) (progDesc desc))|]
+    mkOne :: (String, Either Actions String) -> Q Exp
+    mkOne (nm, Right cmd) =
+      [|command nm (info (pure $ MyCommand cmd) (progDesc nm))|]
+    mkOne (nm, Left actions) = do
+      rst <- mkCommandsMonoid actions
+      [|command nm (info (hsubparser $(pure rst)) (progDesc nm))|]
