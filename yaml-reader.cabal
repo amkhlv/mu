@@ -1,0 +1,21 @@
+cabal-version:      2.4
+name:               yaml-reader
+version:            0.1.0.0
+synopsis:           Sample program to read YAML files
+description:        A simple Haskell program that reads a YAML file and prints the result to stdout
+license:            MIT
+author:             Example Author
+maintainer:         example@example.com
+category:           Examples
+build-type:         Simple
+
+executable yaml-reader
+    main-is:          Main.hs
+    build-depends:    base >=4.14 && <5,
+                      yaml >=0.11 && <0.12,
+                      aeson >=2.0 && <2.3,
+                      aeson-pretty >=0.8 && <0.9,
+                      bytestring >=0.10 && <0.13,
+                      text >=1.2 && <2.2
+    hs-source-dirs:   .
+    default-language: Haskell2010
