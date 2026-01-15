@@ -1,5 +1,17 @@
-com1: echo hi
-com2: ls
+help: |
+  echo
+  echo To install, execute:
+  echo ./install.sh
+  echo This has to be done each time after editing this YAML file.
+  echo To setup bash completions, execute:
+  echo mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
+  echo
+edit: |
+  gvim --nofork ~/.config/amkhlv/mu.yaml
+  pushd ~/a/git/mu
+  ./install.sh
+  popd
+completions: mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
 mult: 
   subcom1: ls -lh
   subcom2: ls -a
