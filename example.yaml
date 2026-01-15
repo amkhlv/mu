@@ -1,17 +1,19 @@
-help: |
-  echo
-  echo To install, execute:
-  echo ./install.sh
-  echo This has to be done each time after editing this YAML file.
-  echo To setup bash completions, execute:
-  echo mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
-  echo
+explore: |
+  nu -c "cat ~/.config/amkhlv/mu.yaml | from yaml | explore"
 edit: |
   gvim --nofork ~/.config/amkhlv/mu.yaml
-  pushd ~/a/git/mu
+  pushd ~/git/mu
   ./install.sh
   popd
-completions: mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
-mult: 
-  subcom1: ls -lh
-  subcom2: ls -a
+completions: |
+  mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
+nix: 
+  unfree: |
+    NIXPKGS_ALLOW_UNFREE=1   nix-shell -p %1
+  chrome: |
+    NIXPKGS_ALLOW_UNFREE=1   nix-shell -p google-chrome
+firefox:
+  work: |
+    firefox -P Work &
+  fun: |
+    firefox -P Fun &
