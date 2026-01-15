@@ -13,21 +13,52 @@ import Options.Applicative
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 import System.Posix.Process (executeFile)
+import Data.Char (isDigit)
 
+type DryRun = Bool
+
+data CommandAndArgs = CommandAndArgs MyCommand [String] DryRun
 
 commandParser :: Parser MyCommand
 commandParser =
   $(mkCommandParserExp)
 
-opts :: ParserInfo MyCommand
-opts = info (commandParser <**> helper) idm
+comArgParser :: Parser CommandAndArgs
+comArgParser = CommandAndArgs <$> commandParser <*> many (argument str
+      (  metavar "ARGUMENTS..."
+      <> help "One or more arguments"
+      )) <*> switch
+      (  long "dry-run"
+      <> short 'n'
+      <> help "Dry run mode"
+      )
 
-runShellCommand :: MyCommand -> IO ()
-runShellCommand (MyCommand cmd) =
-  executeFile "sh" True ["-c", cmd] Nothing
+opts :: ParserInfo CommandAndArgs
+opts = info (comArgParser <**> helper) idm
+
+
+expand :: String -> [String] -> String
+expand [] _ = []
+expand ('%':cs) xs =
+  let (ds, rest) = span isDigit cs
+  in case ds of
+       "" -> '%' : expand cs xs
+       _  -> maybe ('%':ds ++ expand rest xs)
+                   (++ expand rest xs)
+                   (index xs ds)
+expand (c:cs) xs = c : expand cs xs
+
+index :: [a] -> String -> Maybe a
+index xs ds =
+  let n = read ds
+  in if n > 0 && n <= length xs then Just (xs !! (n - 1)) else Nothing
+
+
+runShellCommand :: CommandAndArgs -> IO ()
+runShellCommand (CommandAndArgs (MyCommand cmd) args dryRun) =
+  if dryRun then putStrLn $ expand cmd args else executeFile "sh" True ["-c", expand cmd args] Nothing
 
 main :: IO ()
 main = do
   options <- execParser opts
-  putStrLn $ show options
   runShellCommand options

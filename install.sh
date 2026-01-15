@@ -3,7 +3,7 @@ set -euo pipefail
 
 cabal clean
 
-cabal build exe:mu -v0
+cabal build exe:mu
 
 BIN="$(cabal list-bin exe:mu)"
 install -m 0755 -D "$BIN" "$HOME/.local/bin/mu"
