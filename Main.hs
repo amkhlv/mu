@@ -12,8 +12,8 @@ import Language.Haskell.TH
 import Options.Applicative
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
-import System.Process (readProcess)
-import Control.Exception (catch, SomeException)
+import System.Posix.Process (executeFile)
+
 
 commandParser :: Parser MyCommand
 commandParser =
@@ -22,19 +22,12 @@ commandParser =
 opts :: ParserInfo MyCommand
 opts = info (commandParser <**> helper) idm
 
-runShellCommand :: MyCommand -> IO (Either String String)
-runShellCommand (MyCommand cmd) = do
-  result <- (Right <$> readProcess "sh" ["-c", cmd] "") `catch` handleShellError
-  return result
-  where
-    handleShellError :: SomeException -> IO (Either String String)
-    handleShellError e = return $ Left $ "Error executing command: " ++ show e
+runShellCommand :: MyCommand -> IO ()
+runShellCommand (MyCommand cmd) =
+  executeFile "sh" True ["-c", cmd] Nothing
 
 main :: IO ()
 main = do
   options <- execParser opts
   putStrLn $ show options
-  result <- runShellCommand options
-  case result of
-    Right output -> putStrLn output
-    Left error -> hPutStrLn stderr error
+  runShellCommand options

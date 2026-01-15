@@ -22,6 +22,7 @@ executable mu
                       template-haskell,
                       transformers,
                       unordered-containers,
-                      process
+                      unix,
+                      directory
     hs-source-dirs:   .
     default-language: Haskell2010
