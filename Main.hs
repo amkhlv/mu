@@ -14,6 +14,7 @@ import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 import System.Posix.Process (executeFile)
 import Data.Char (isDigit)
+import Data.List (intercalate)
 
 type DryRun = Bool
 
@@ -42,8 +43,10 @@ expand [] _ = []
 expand ('%':cs) xs =
   let (ds, rest) = span isDigit cs
   in case ds of
-       "" -> '%' : expand cs xs
-       _  -> maybe ('%':ds ++ expand rest xs)
+       "" -> case rest of
+               '@':rest1 -> intercalate " " xs ++ expand rest1 xs
+               _ -> '%' : expand cs xs
+       _  -> maybe (expand rest xs)
                    (++ expand rest xs)
                    (index xs ds)
 expand (c:cs) xs = c : expand cs xs
