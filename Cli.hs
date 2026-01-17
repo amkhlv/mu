@@ -36,7 +36,7 @@ getYAML f = do
     Right value -> return $ processObject value
     Left err -> fail $ "YAML Error: " ++ Yaml.prettyPrintParseException err
 
-data MyCommand = MyCommand String deriving (Show)
+data MyCommand = MyCommand String [String] deriving (Show)
 
 mkCommandParserExp :: TH.Q TH.Exp
 mkCommandParserExp  = do
@@ -58,7 +58,19 @@ mkCommandParserExp  = do
 
     mkOne :: (String, Either Actions String) -> TH.Q TH.Exp
     mkOne (nm, Right cmd) =
-      [|command nm (info (pure $ MyCommand cmd) (progDesc nm))|]
+      [|
+        command nm $
+          info
+            ( MyCommand cmd
+                <$> many (argument str
+                      (  metavar "ARGUMENTS..."
+                      <> help "Arguments (files, etc.)"
+                      <> completer (bashCompleter "file")
+                      ))
+            )
+            (progDesc nm)
+      |]
+
     mkOne (nm, Left actions) = do
       rst <- mkCommandsMonoid actions
-      [|command nm (info (hsubparser $(pure rst)) (progDesc nm))|]
+      [| command nm (info (hsubparser $(pure rst)) (progDesc nm)) |]

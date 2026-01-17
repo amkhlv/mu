@@ -18,21 +18,18 @@ import Data.List (intercalate)
 
 type DryRun = Bool
 
-data CommandAndArgs = CommandAndArgs MyCommand [String] DryRun
+data CommandAndArgs = CommandAndArgs MyCommand  DryRun
 
 commandParser :: Parser MyCommand
 commandParser =
   $(mkCommandParserExp)
 
+
 comArgParser :: Parser CommandAndArgs
-comArgParser = CommandAndArgs <$> commandParser <*> many (argument str
-      (  metavar "ARGUMENTS..."
-      <> help "One or more arguments"
-      )) <*> switch
-      (  long "dry-run"
-      <> short 'n'
-      <> help "Dry run mode"
-      )
+comArgParser =
+  CommandAndArgs
+    <$> commandParser
+    <*> switch (long "dry-run" <> short 'n' <> help "Dry run mode")
 
 opts :: ParserInfo CommandAndArgs
 opts = info (comArgParser <**> helper) idm
@@ -58,8 +55,10 @@ index xs ds =
 
 
 runShellCommand :: CommandAndArgs -> IO ()
-runShellCommand (CommandAndArgs (MyCommand cmd) args dryRun) =
-  if dryRun then putStrLn $ expand cmd args else executeFile "sh" True ["-c", expand cmd args] Nothing
+runShellCommand (CommandAndArgs (MyCommand cmd args) dryRun) =
+  if dryRun
+    then putStrLn (expand cmd args)
+    else executeFile "sh" True ["-c", expand cmd args] Nothing
 
 main :: IO ()
 main = do
