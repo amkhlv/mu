@@ -18,9 +18,14 @@ completions: |
   mu --bash-completion-script mu > ~/.local/share/bash-completion/completions/mu
 nix: 
   unfree: |
-    NIXPKGS_ALLOW_UNFREE=1   nix-shell -p %1
+    NIXPKGS_ALLOW_UNFREE=1   nix-shell -p %@
   chrome: |
     NIXPKGS_ALLOW_UNFREE=1   nix-shell -p google-chrome
+openssl: 
+  info: >
+    openssl x509 -in %1 -noout -subject -issuer -serial -dates
+xcompose:
+  grep -R %@ /nix/store/*X11*/share/X11/locale/en_*UTF-8/Compose
 firefox:
   work: |
     firefox -P Work &
